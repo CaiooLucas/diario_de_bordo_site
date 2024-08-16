@@ -1,5 +1,5 @@
 from pyexpat.errors import messages
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from markupsafe import escape
 
 # Importa a função `sessionmaker`, que é usada para criar uma nova sessão para interagir com o banco de dados
@@ -70,9 +70,23 @@ def inserir_aluno():
         session.rollback()
     finally:
         session.close()
-    mensagem = 'Aluno cadastrado com sucesso'
-    return render_template('index.html', mensagem=mensagem)
+    mensagem = 'cadastrado com sucesso!'
+    return redirect(url_for('listar_alunos'))
 
+@app.route('/alunos', methods=['GET'])
+def listar_alunos():
+    try:
+        #buscar todos os alunos do banco de dados
+        alunos = session.query(Aluno).all()
+        print(alunos)
+    except:
+        session.rollback()
+        msg = 'erro ao tentar recuperar a lista de alunos.'
+        return render_template('index.html',msgbanco=msg)
+    finally:
+        session.close()
+
+    return render_template('listaalunos.html', alunos=alunos)
 
 
 if __name__ == "__main__":
